@@ -8,11 +8,14 @@ import yaml from 'js-yaml';
 import { appFile } from '../constants';
 import { AppConfig } from '../types';
 
+import ErrnoException = NodeJS.ErrnoException;
+
 function readAppYaml(filepath: string) {
   try {
     return fs.readFileSync(filepath, 'utf-8');
   } catch (error) {
-    if (error.code !== 'ENOENT') {
+    const nodeErr = error as ErrnoException;
+    if (nodeErr.code !== 'ENOENT') {
       throw error;
     }
 

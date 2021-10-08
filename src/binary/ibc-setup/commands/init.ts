@@ -13,6 +13,10 @@ import { generateMnemonic } from '../../utils/generate-mnemonic';
 import { loadAndValidateRegistry } from '../../utils/load-and-validate-registry';
 import { resolveOption } from '../../utils/options/resolve-option';
 import { resolveHomeOption } from '../../utils/options/shared/resolve-home-option';
+import ErrnoException = NodeJS.ErrnoException;
+
+
+
 
 type Flags = {
   readonly home?: string;
@@ -28,18 +32,19 @@ export type Options = {
   readonly registryFrom: string | null;
 };
 
+
 function copyRegistryFile(from: string, to: string) {
   try {
     fs.copyFileSync(from, to);
     console.log(`Copied existing registry from ${from} to ${to}.`);
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      throw new Error(
-        `No such file: ${from}. Make sure that "--registry-from" points at existing relayer's home dir.`
-      );
-    } else {
+  } catch (error: unknown) {
+      const nodeErr = error as ErrnoException;
+      if (nodeErr && nodeErr.code === 'ENOENT') {
+        throw new Error(
+          `No such file: ${from}. Make sure that "--registry-from" points at existing relayer's home dir.`
+        );
+      }
       throw error;
-    }
   }
 }
 
